@@ -1,0 +1,18 @@
+{
+  "name": "amid",
+  "version": "0.1.0",
+  "private": true,
+  "description": "此间 · Amid：一个有入口、有记忆、有时间感的私人数字空间。",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0-beta.5"
+  },
+  "scripts": {
+    "dev": "node --use-env-proxy server.js",
+    "start": "node --use-env-proxy server.js",
+    "start:termux": "node server.js"
+  }
+}

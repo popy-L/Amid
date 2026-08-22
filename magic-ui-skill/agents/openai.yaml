@@ -1,0 +1,4 @@
+interface:
+  display_name: "Magic UI Design Guide"
+  short_description: "Build distinctive React interfaces with Magic UI patterns"
+  default_prompt: "Use $magic-ui to choose and implement a distinctive animated interface pattern for this product."

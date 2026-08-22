@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+.qa/
+.data/
+dist/
+.codex-manual-cache/
+.playwright-mcp/
+cc-switch-settings.stage.json
+*.docx
+edit_docx_*.py
+extract_docx_media.py
+inspect_docx_api.py
+patch_docx_diagram_labels.py

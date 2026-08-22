@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fbf8f7" />
+    <meta name="description" content="此间 · Amid：一个有入口、有记忆、有时间感的私人数字空间。" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/pwa-home/icon-192.png" />
+    <link rel="apple-touch-icon" href="/assets/pwa-home/icon-192.png" />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>此间 · Amid</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="brand" data-route="home" aria-label="返回此间首页">
+          <span class="brand-mark">此</span>
+          <span><strong>此间</strong><small>Amid</small></span>
+        </button>
+        <div class="topbar-actions">
+          <span class="status-pill" id="relay-status"><i></i>检查中</span>
+          <button class="icon-button" id="settings-button" aria-label="打开设置">⚙</button>
+        </div>
+      </header>
+
+      <main id="app" class="content" aria-live="polite"></main>
+
+      <nav class="bottom-nav" aria-label="主导航">
+        <button data-route="home" class="nav-item active"><span>⌂</span><small>此间</small></button>
+        <button data-route="chat" class="nav-item"><span>◌</span><small>对话</small></button>
+        <button data-route="diary" class="nav-item"><span>▤</span><small>日记</small></button>
+        <button data-route="memory" class="nav-item"><span>✦</span><small>记忆</small></button>
+      </nav>
+    </div>
+    <div id="toast" class="toast" role="status"></div>
+    <aside id="claude-popup" class="claude-popup" aria-live="polite" hidden>
+      <button type="button" class="claude-popup-main" id="claude-popup-open">
+        <span class="claude-popup-avatar" aria-hidden="true">C</span>
+        <span><small>CLAUDE · 新消息</small><strong id="claude-popup-text">我在。</strong></span>
+      </button>
+      <button type="button" class="claude-popup-close" id="claude-popup-close" aria-label="关闭通知">×</button>
+    </aside>
+    <aside class="global-voice-mini" id="global-voice-mini" aria-label="通话正在进行" hidden>
+      <button type="button" class="global-voice-mini-main" id="global-voice-restore"><i aria-hidden="true"></i><span><strong>Claude</strong><small id="global-voice-mini-status">正在通话…</small></span><time id="global-voice-mini-duration">00:00</time></button>
+      <button type="button" class="global-voice-mini-mute" id="global-voice-mute" aria-label="闭麦" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5.5 11.5V12a6.5 6.5 0 0 0 13 0v-.5M12 18.5V22M9 22h6"/><path class="mute-slash" d="m5 4 14 16"/></svg></button><button type="button" class="global-voice-mini-end" id="global-voice-end" aria-label="挂断"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.6 1.9Z"/></svg></button>
+    </aside>
+    <dialog id="settings-dialog" class="settings-dialog">
+      <section class="settings-card global-settings-card" aria-labelledby="global-settings-title">
+        <header class="global-settings-header"><button type="button" id="global-settings-back" aria-label="返回" hidden>‹</button><div><small>AMID SETTINGS</small><h2 id="global-settings-title">设置</h2></div><button type="button" id="global-settings-close" aria-label="关闭">×</button></header>
+        <div id="global-settings-content"></div>
+      </section>
+    </dialog>
+    <dialog id="access-dialog" class="access-dialog">
+      <form class="access-card" id="access-form">
+        <span class="access-lock" aria-hidden="true">此</span>
+        <small>PRIVATE AMID</small>
+        <h2>解锁此间</h2>
+        <p>输入部署时设置的私人访问令牌。验证成功后只保存在这台设备上。</p>
+        <label><span>访问令牌</span><input id="access-token-input" type="password" autocomplete="current-password" required /></label>
+        <div class="access-error" id="access-error" role="alert"></div>
+        <button type="submit">进入此间</button>
+      </form>
+    </dialog>
+    <dialog id="message-history-dialog" class="message-history-dialog">
+      <form method="dialog" class="message-history-sheet">
+        <header><div><small>FROM CLAUDE</small><h2>历史留言</h2></div><button value="close" aria-label="关闭">×</button></header>
+        <div class="message-history-list"><p class="empty">正在读取留言…</p></div>
+      </form>
+    </dialog>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

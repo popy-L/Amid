@@ -1,0 +1,167 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -u
+
+APP_DIR="${AMID_INSTALL_DIR:-$HOME/Amid}"
+DATA_DIR="${AMID_DATA_DIR:-$HOME/.local/share/amid}"
+if [ -f "$APP_DIR/.env" ]; then
+  configured_data_dir="$(sed -n 's/^AMID_DATA_DIR=//p' "$APP_DIR/.env" | tail -n 1 | tr -d '\r\"')"
+  configured_port="$(sed -n 's/^PORT=//p' "$APP_DIR/.env" | tail -n 1 | tr -cd '0-9')"
+  [ -n "$configured_data_dir" ] && DATA_DIR="$configured_data_dir"
+  [ -n "$configured_port" ] && PORT="$configured_port"
+fi
+PID_FILE="$DATA_DIR/server.pid"
+LOG_FILE="$DATA_DIR/server.log"
+URL="http://localhost:${PORT:-4173}"
+
+mkdir -p "$DATA_DIR"
+
+read_pid() {
+  if [ -f "$PID_FILE" ]; then
+    tr -cd '0-9' < "$PID_FILE"
+  fi
+}
+
+is_running() {
+  local pid
+  pid="$(read_pid)"
+  [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null
+}
+
+start_amid() {
+  if is_running; then
+    echo "此间已经在运行：$URL"
+    return 0
+  fi
+  if [ ! -f "$APP_DIR/server.js" ]; then
+    echo "没有找到 $APP_DIR/server.js，请重新运行 Termux 安装脚本。" >&2
+    return 1
+  fi
+
+  rm -f "$PID_FILE"
+  command -v termux-wake-lock >/dev/null 2>&1 && termux-wake-lock >/dev/null 2>&1 || true
+  cd "$APP_DIR" || return 1
+  nohup node server.js >>"$LOG_FILE" 2>&1 </dev/null &
+  echo "$!" > "$PID_FILE"
+  sleep 1
+
+  if is_running; then
+    echo "此间已启动：$URL"
+    echo "日志：$LOG_FILE"
+  else
+    echo "此间启动失败，最近的日志如下：" >&2
+    tail -n 40 "$LOG_FILE" 2>/dev/null >&2 || true
+    rm -f "$PID_FILE"
+    return 1
+  fi
+}
+
+stop_amid() {
+  if ! is_running; then
+    rm -f "$PID_FILE"
+    echo "此间当前没有运行。"
+    return 0
+  fi
+
+  local pid
+  pid="$(read_pid)"
+  kill "$pid" 2>/dev/null || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    kill -0 "$pid" 2>/dev/null || break
+    sleep 0.2
+  done
+  rm -f "$PID_FILE"
+  command -v termux-wake-unlock >/dev/null 2>&1 && termux-wake-unlock >/dev/null 2>&1 || true
+  echo "此间已停止。"
+}
+
+status_amid() {
+  if is_running; then
+    echo "运行中 · PID $(read_pid) · $URL"
+    if command -v curl >/dev/null 2>&1; then
+      curl -fsS "$URL/api/health" >/dev/null 2>&1 && echo "接口检查正常。" || echo "进程存在，但接口暂未响应。"
+    fi
+  else
+    echo "未运行。输入 amid start 启动。"
+    return 1
+  fi
+}
+
+open_amid() {
+  start_amid || return 1
+  if command -v termux-open-url >/dev/null 2>&1; then
+    termux-open-url "$URL"
+  else
+    echo "请在 Chrome 中打开 $URL"
+  fi
+}
+
+update_amid() {
+  if [ -d "$APP_DIR/.git" ]; then
+    cd "$APP_DIR" || return 1
+    git pull --ff-only || return 1
+    stop_amid
+    start_amid
+    return
+  fi
+
+  local archive stage_dir
+  archive="${1:-$HOME/storage/downloads/Amid-Termux.zip}"
+  if [ ! -f "$archive" ]; then
+    echo "没有找到更新包：$archive" >&2
+    echo "把新版 Amid-Termux.zip 放到手机的下载目录，再运行 amid update。" >&2
+    echo "如果文件名不同，可以运行：amid update /完整路径/文件名.zip" >&2
+    return 1
+  fi
+  if ! command -v unzip >/dev/null 2>&1; then
+    echo "正在安装 unzip…"
+    pkg install -y unzip || return 1
+  fi
+  if [ -z "$DATA_DIR" ] || [ "$DATA_DIR" = "/" ]; then
+    echo "数据目录异常，已停止更新。" >&2
+    return 1
+  fi
+
+  stage_dir="$DATA_DIR/update-package"
+  rm -rf -- "$stage_dir"
+  mkdir -p "$stage_dir"
+  unzip -oq "$archive" -d "$stage_dir" || return 1
+  if [ ! -f "$stage_dir/scripts/termux/install.sh" ]; then
+    echo "这个压缩包不是有效的此间 Termux 安装包。" >&2
+    rm -rf -- "$stage_dir"
+    return 1
+  fi
+
+  echo "正在安装新版，此间的数据和密钥不会被覆盖。"
+  bash "$stage_dir/scripts/termux/install.sh"
+  local result=$?
+  rm -rf -- "$stage_dir"
+  return "$result"
+}
+
+show_help() {
+  cat <<'EOF'
+此间 · Termux 控制命令
+
+  amid start     启动本地服务
+  amid stop      停止本地服务
+  amid restart   重新启动
+  amid status    查看状态
+  amid open      启动并用浏览器打开
+  amid logs      查看最近日志
+  amid update    从下载目录安装新版压缩包；Git 安装则拉取更新
+
+浏览器地址：http://localhost:4173
+EOF
+}
+
+case "${1:-open}" in
+  start) start_amid ;;
+  stop) stop_amid ;;
+  restart) stop_amid; start_amid ;;
+  status) status_amid ;;
+  open) open_amid ;;
+  logs) tail -n 120 "$LOG_FILE" 2>/dev/null || echo "还没有日志。" ;;
+  update) update_amid "${2:-}" ;;
+  help|-h|--help) show_help ;;
+  *) show_help; exit 2 ;;
+esac
