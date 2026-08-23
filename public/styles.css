@@ -3159,3 +3159,79 @@ html.is-moments-route body,html.is-moments-route .app-shell,html.is-memory-route
     transform:scale(.91);
   }
 }
+
+/* Dual-client foundation: one product, two presentation shells. */
+.desktop-rail { display:none; }
+
+@media (min-width:1100px) and (pointer:fine) {
+  :root { --desktop-rail-width:236px; }
+
+  .desktop-rail {
+    position:fixed;
+    z-index:55;
+    inset:0 auto 0 0;
+    width:var(--desktop-rail-width);
+    padding:30px 20px 22px;
+    display:flex;
+    flex-direction:column;
+    border-right:1px solid rgba(207,177,187,.48);
+    background:linear-gradient(180deg,rgba(255,250,252,.96),rgba(246,238,241,.94));
+    box-shadow:14px 0 38px rgba(76,58,65,.055);
+    color:#554d50;
+    font-family:"Terrarum Bitmap","Cascadia Mono","Microsoft YaHei",sans-serif;
+    backdrop-filter:blur(22px);
+  }
+  .desktop-rail-brand { display:flex; align-items:center; gap:12px; padding:0 8px 25px; border-bottom:1px dashed rgba(202,151,170,.48); }
+  .desktop-rail-brand > span { width:46px; height:46px; display:grid; place-items:center; border-radius:15px; background:#544e50; color:#fff; font-size:21px; box-shadow:inset 0 0 0 4px #f4dfe7; }
+  .desktop-rail-brand div,.desktop-rail-brand strong,.desktop-rail-brand small { display:block; }
+  .desktop-rail-brand strong { font-size:20px; font-weight:500; letter-spacing:.08em; }
+  .desktop-rail-brand small { margin-top:4px; color:#b38998; font-size:8px; letter-spacing:.08em; }
+  .desktop-rail nav { margin-top:24px; display:flex; flex-direction:column; gap:7px; }
+  .desktop-rail button { width:100%; min-height:54px; padding:8px 12px; display:grid; grid-template-columns:31px minmax(0,1fr); align-items:center; gap:9px; border:1px solid transparent; border-radius:16px; background:transparent; color:#746a6e; text-align:left; transition:background-color .16s ease,border-color .16s ease,transform .16s ease,color .16s ease; }
+  .desktop-rail button:hover { border-color:rgba(224,178,194,.48); background:rgba(255,255,255,.62); transform:translateX(2px); }
+  .desktop-rail button.active { border-color:rgba(220,157,179,.58); background:#fff7fa; color:#c66f91; box-shadow:0 8px 20px rgba(121,76,93,.06); }
+  .desktop-rail button i { width:29px; height:29px; display:grid; place-items:center; border-radius:10px; background:rgba(236,213,222,.44); font:normal 16px/1 Georgia,serif; }
+  .desktop-rail button span,.desktop-rail button small { display:block; }
+  .desktop-rail button span { font-size:13px; }
+  .desktop-rail button small { margin-top:3px; color:#ad9ca3; font-size:8px; letter-spacing:.1em; }
+  .desktop-rail footer { margin-top:auto; padding-top:18px; border-top:1px dashed rgba(202,151,170,.42); }
+  .desktop-rail footer > button { margin-bottom:12px; }
+  .desktop-rail footer p { margin:0; padding:0 10px; display:flex; justify-content:space-between; color:#ba9ba7; font-size:8px; letter-spacing:.12em; }
+
+  body > .app-shell { padding-left:var(--desktop-rail-width); }
+  html.is-home-route .app-shell,
+  html.is-diary-route .app-shell,
+  html.is-moments-route .app-shell,
+  html.is-memory-route .app-shell { padding:24px 24px 24px calc(var(--desktop-rail-width) + 24px); }
+  html.is-chat-route .app-shell { padding-left:var(--desktop-rail-width); }
+  html.is-chat-route .chat-app-shell { height:100dvh; }
+
+  .ordinary-screen { width:min(100%,1180px); }
+  .ordinary-home {
+    min-height:calc(100svh - 48px);
+    padding:30px 34px 36px;
+    display:grid;
+    grid-template-columns:minmax(430px,1.08fr) minmax(350px,.92fr);
+    grid-template-areas:
+      "head head"
+      "tasks tasks"
+      "clock music"
+      "clock features"
+      "message calendar"
+      "message moments"
+      "favorites settings";
+    align-content:start;
+    gap:18px 24px;
+  }
+  .ordinary-home-header { grid-area:head; }
+  .ordinary-home > .home-background-tasks { grid-area:tasks; margin:0; }
+  .ordinary-home > .ordinary-clock-card { grid-area:clock; height:100%; min-height:620px; margin:0; aspect-ratio:auto; }
+  .ordinary-home > .home-music-player { grid-area:music; margin:0; }
+  .ordinary-home > .ordinary-feature-grid { grid-area:features; margin:0; }
+  .ordinary-home > .ordinary-calendar-shortcut { grid-area:calendar; margin:0; }
+  .ordinary-home > .ordinary-moments-shortcut { grid-area:moments; margin:0; }
+  .ordinary-home > .home-message-secondary { grid-area:message; min-height:260px; margin:0; }
+  .ordinary-home > .ordinary-favorites-shortcut { grid-area:favorites; margin:0; }
+  .ordinary-home > .home-settings-entry { grid-area:settings; margin:0; }
+  .ordinary-home > .ordinary-bottom-nav { display:none; }
+}

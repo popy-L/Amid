@@ -1,3 +1,5 @@
+import { AMID_VERSION, applyClientMode, observeClientMode } from "./platform.js";
+
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 const dialog = document.querySelector("#settings-dialog");
@@ -2332,6 +2334,7 @@ function setRoute(route) {
   document.documentElement.classList.toggle("is-moments-route", route === "moments");
   document.documentElement.classList.toggle("is-memory-route", route === "memory");
   document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.route === route));
+  document.querySelectorAll("[data-desktop-route]").forEach((item) => item.classList.toggle("active", item.dataset.desktopRoute === route));
   routes[route]?.();
   syncVoiceCallSurface();
   bindSpotlights();
@@ -2547,7 +2550,7 @@ function renderHome() {
       </nav>
     </section>`;
   bindRouteButtons();
-  document.querySelector("#home-hero-gallery").addEventListener("click", () => setHeroImage(state.heroImageIndex + 1));
+  document.querySelector("#home-hero-gallery")?.addEventListener("click", () => setHeroImage(state.heroImageIndex + 1));
   bindHomeMusicPlayer();
   document.querySelector("#home-favorites-entry")?.addEventListener("click", () => openGlobalSettings("favorites"));
   updateHomeClock();
@@ -7996,6 +7999,11 @@ async function loadRelayStatus() {
 }
 
 document.addEventListener("click", (event) => {
+  const desktopRouteButton = event.target.closest("[data-desktop-route]");
+  if (desktopRouteButton) {
+    setRoute(desktopRouteButton.dataset.desktopRoute);
+    return;
+  }
   if (event.target.closest("#message-history-entry")) {
     renderHomeMessageHistory();
     if (!messageHistoryDialog.open) messageHistoryDialog.showModal();
@@ -8027,6 +8035,7 @@ document.addEventListener("click", (event) => {
   if (routeButton) setRoute(routeButton.dataset.route);
 });
 document.querySelector("#settings-button")?.addEventListener("click", () => openGlobalSettings("root"));
+document.querySelector("#desktop-settings-button")?.addEventListener("click", () => openGlobalSettings("root"));
 document.querySelector("#global-settings-close")?.addEventListener("click", closeGlobalSettings);
 document.querySelector(".brand").addEventListener("click", () => setRoute("home"));
 document.querySelector("#claude-popup-close")?.addEventListener("click", hideClaudePopup);
@@ -8067,6 +8076,10 @@ document.addEventListener("visibilitychange", () => {
   } else {
     setVoiceCallView("background", "后台通话中…", "切到其他应用后会尽量继续；Android 若冻结 PWA，回来后会自动恢复。 ");
   }
+});
+applyClientMode();
+observeClientMode(() => {
+  document.dispatchEvent(new CustomEvent("amid:client-mode-change", { detail: { version: AMID_VERSION } }));
 });
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 setRoute(state.route);

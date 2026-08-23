@@ -1,6 +1,6 @@
 {
   "name": "amid",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "此间 · Amid：一个有入口、有记忆、有时间感的私人数字空间。",
   "type": "module",
