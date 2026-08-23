@@ -6,6 +6,8 @@ const dialog = document.querySelector("#settings-dialog");
 const accessDialog = document.querySelector("#access-dialog");
 const messageHistoryDialog = document.querySelector("#message-history-dialog");
 const claudePopup = document.querySelector("#claude-popup");
+const initialClientMode = applyClientMode();
+const routeScrollStorageKey = `amid-route-scroll-${initialClientMode}`;
 let amidAccessToken = localStorage.getItem("amid-access-token") || "";
 const designOptions = ["plain"];
 const viewOptions = ["home", "chat", "calendar", "diary", "moments", "memory"];
@@ -673,7 +675,7 @@ const routes = {
 
 function loadRouteScrollPositions() {
   try {
-    const stored = JSON.parse(sessionStorage.getItem("amid-route-scroll") || "{}");
+    const stored = JSON.parse(sessionStorage.getItem(routeScrollStorageKey) || "{}");
     return stored && typeof stored === "object" ? stored : {};
   } catch {
     return {};
@@ -692,7 +694,7 @@ function saveRouteScroll(route) {
     position.innerBottom = Math.max(0, chatHistory.scrollHeight - chatHistory.scrollTop - chatHistory.clientHeight);
   }
   routeScrollPositions[route] = position;
-  try { sessionStorage.setItem("amid-route-scroll", JSON.stringify(routeScrollPositions)); } catch {}
+  try { sessionStorage.setItem(routeScrollStorageKey, JSON.stringify(routeScrollPositions)); } catch {}
 }
 
 function restoreRouteScroll(route) {
@@ -8077,7 +8079,6 @@ document.addEventListener("visibilitychange", () => {
     setVoiceCallView("background", "后台通话中…", "切到其他应用后会尽量继续；Android 若冻结 PWA，回来后会自动恢复。 ");
   }
 });
-applyClientMode();
 observeClientMode(() => {
   document.dispatchEvent(new CustomEvent("amid:client-mode-change", { detail: { version: AMID_VERSION } }));
 });

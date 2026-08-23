@@ -3235,3 +3235,68 @@ html.is-moments-route body,html.is-moments-route .app-shell,html.is-memory-route
   .ordinary-home > .home-settings-entry { grid-area:settings; margin:0; }
   .ordinary-home > .ordinary-bottom-nav { display:none; }
 }
+
+@media (min-width:1100px) and (pointer:fine) {
+  /* Desktop pages keep their own reading measure instead of stretching the mobile canvas. */
+  .ordinary-bottom-nav { display:none !important; }
+  .chat-back-button { visibility:hidden; pointer-events:none; }
+  .ordinary-diary-header > button:first-child { visibility:hidden; pointer-events:none; }
+
+  .settings-dialog { width:min(780px,calc(100% - 96px)); }
+  .global-settings-card { max-height:min(820px,calc(100svh - 72px)); }
+  .global-settings-header { padding:20px 24px 16px; }
+  #global-settings-content { padding:20px 24px 24px; }
+  .settings-overview { gap:18px; }
+  .settings-group-grid { gap:16px; }
+
+  .ordinary-memory { width:min(100%,1060px); padding-bottom:52px; }
+  .ordinary-memory-archive { width:min(100%,980px); padding-bottom:48px; }
+  .ordinary-memory .core-memory-copy > p,
+  .ordinary-memory .daily-summary-card > p,
+  .ordinary-memory .ordinary-memory-card p { max-width:86ch; }
+
+  .ordinary-diary-page { width:min(100%,920px); padding-bottom:44px; }
+  .ordinary-diary-page .diary-page-lead,
+  .ordinary-diary-page .diary-owner-switch,
+  .ordinary-diary-page .diary-day-summary,
+  .ordinary-diary-page .claude-diary-pagination,
+  .ordinary-diary-page .daily-entry-editor,
+  .ordinary-diary-page .diary-readonly-record,
+  .ordinary-diary-page .diary-empty-record { width:min(100%,780px); margin-left:auto; margin-right:auto; }
+
+  .ordinary-moments { width:min(100%,940px); padding-bottom:48px; }
+  .ordinary-moments .moments-intro,
+  .ordinary-moments .moment-composer,
+  .ordinary-moments .moments-feed { width:min(100%,790px); margin-left:auto; margin-right:auto; }
+
+  .ordinary-calendar-page {
+    width:min(100%,1100px);
+    padding-bottom:48px;
+    display:grid;
+    grid-template-columns:minmax(0,1.22fr) minmax(310px,.78fr);
+    grid-template-areas:
+      "calendar-head calendar-head"
+      "calendar mood"
+      "calendar day"
+      "calendar preview"
+      "cycle cycle"
+      "insights insights";
+    align-content:start;
+    column-gap:28px;
+    row-gap:14px;
+  }
+  .ordinary-calendar-page > .ordinary-diary-header { grid-area:calendar-head; top:24px; margin:0; border:1px solid rgba(224,211,216,.78); border-radius:20px; }
+  .ordinary-calendar-page > .ordinary-calendar { grid-area:calendar; margin:4px 0 0; padding:12px 16px 18px; border:1px solid var(--plain-line); border-radius:25px; background:rgba(255,255,255,.48); }
+  .ordinary-calendar-page > .diary-month-overview { grid-area:mood; margin:4px 0 0; }
+  .ordinary-calendar-page > .diary-day-summary { grid-area:day; padding:0 14px; border:1px solid var(--plain-line); border-radius:17px; background:rgba(255,255,255,.42); }
+  .ordinary-calendar-page > .calendar-diary-preview { grid-area:preview; margin:0; }
+  .ordinary-calendar-page > .cycle-tracker { grid-area:cycle; margin-top:4px; }
+  .ordinary-calendar-page > .cycle-insights { grid-area:insights; }
+  .ordinary-calendar-page .calendar-days { row-gap:7px; }
+  .ordinary-calendar-page .calendar-day { font-size:15px; }
+
+  .ordinary-diary-page > .ordinary-diary-header,
+  .ordinary-moments > .ordinary-diary-header,
+  .ordinary-memory > .ordinary-diary-header,
+  .ordinary-memory-archive > .ordinary-diary-header { margin-inline:0; border-radius:20px; }
+}

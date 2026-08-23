@@ -1,4 +1,4 @@
-const CACHE = "amid-shell-v264";
+const CACHE = "amid-shell-v265";
 const ASSETS = ["/", "/index.html", "/styles.css", "/app.js", "/manifest.webmanifest", "/backgrounds/amid-main.jpg", "/assets/fonts/TerrarumSansBitmap.otf", "/assets/plain-theme/sleeping-cats.png", "/assets/plain-theme/hero-chase.jpg", "/assets/plain-theme/hero-bag.jpg", "/assets/plain-theme/hero-donut-cutout.webp", "/assets/plain-theme/diary-settings-sprite.png", "/assets/plain-theme/diary-icon.png", "/assets/plain-theme/calendar-icon.png", "/assets/plain-theme/chat-icon.png", "/assets/pwa-home/icon-192.png", "/assets/pwa-home/icon-512.png", "/assets/action-icons/copy.png", "/assets/action-icons/reply.png", "/assets/action-icons/transcript.png", "/assets/action-icons/select.png", "/assets/action-icons/favorite.png", "/assets/action-icons/favorite-outline.png", "/assets/action-icons/delete.png", "/assets/action-icons/voice.png", "/assets/action-icons/regenerate.png", "/assets/action-icons/forward.png"];
 ASSETS.push("/platform.js");
 self.addEventListener("install", (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())));
