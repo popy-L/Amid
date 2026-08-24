@@ -429,8 +429,8 @@ function voiceOutputToolDefinitions({ message = true, call = true } = {}) {
   if (call) tools.push({
     name: "start_voice_call",
     title: "发起语音通话",
-    description: "可选来电工具。仅当确实希望与用户实时语音交谈时调用。调用只会显示来电邀请，用户接听后才开启麦克风。",
-    inputSchema: { type: "object", properties: { reason: { type: "string", description: "显示在来电界面的简短理由。" }, openingLine: { type: "string", description: "可选；接通后希望先说的第一句话。" } }, required: ["reason"], additionalProperties: false },
+    description: "可选来电工具。仅当确实希望与用户实时语音交谈时调用。不要另写来电理由；想说的内容放在 openingLine，等用户接听后直接说。openingLine 必须以 Claude 自己的第一人称直接对用户说话，使用‘我/你’，不要用第三人称描述 Claude 或用户。",
+    inputSchema: { type: "object", properties: { openingLine: { type: "string", description: "用户接听后，Claude 以第一人称直接对用户说的第一句话。" } }, required: ["openingLine"], additionalProperties: false },
     annotations: { readOnlyHint: false, openWorldHint: false },
     source: "builtin",
   });

@@ -2793,10 +2793,15 @@ function messageById(id) {
 function stripVoiceAudioTags(text) {
   let matcher;
   try { matcher = new RegExp(state.voiceTagRegex, "gi"); } catch { matcher = /\[(?:[a-z][a-z0-9' -]{0,48})\]\s*/gi; }
-  return String(text || "")
+  return stripVoiceSourceLabels(String(text || "")
     .replace(matcher, "")
     .replace(/[ \t]+([,.!?;，。！？；])/g, "$1")
-    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]{2,}/g, " "));
+}
+
+function stripVoiceSourceLabels(text) {
+  return String(text || "")
+    .replace(/(^|\n)((?:\s*\[[a-z][a-z0-9' -]{0,48}\]\s*)*)(?:【(?:语音|通话语音)】|\[(?:语音|通话语音)\])\s*/gi, "$1$2")
     .trimStart();
 }
 
@@ -5747,7 +5752,7 @@ async function generateAssistantReply() {
     });
     const incomingCallTool = (result.tools || assistantMessage.tools || []).findLast((tool) => tool.name === "start_voice_call" && !tool.error);
     const hasRealAssistantText = Boolean(String(result.text || streamedAssistantText || assistantMessage.content || "").trim());
-    const rawAssistantText = String(result.text || streamedAssistantText || assistantMessage.content || (incomingCallTool ? String(incomingCallTool.arguments?.reason || "Claude 想和你通话") : "这次没有返回正文。"));
+    const rawAssistantText = String(result.text || streamedAssistantText || assistantMessage.content || (incomingCallTool ? "我打给你。" : "这次没有返回正文。"));
     if (isLeakedMessageMetadata(rawAssistantText)) {
       state.messages = state.messages.filter((message) => message.responseGroupId !== assistantMessage.responseGroupId && message.id !== assistantMessage.id);
       saveState();
@@ -6166,12 +6171,12 @@ function dismissIncomingVoiceCall() {
   window.setTimeout(() => layer.remove(), 180);
 }
 
-function showIncomingVoiceCall({ reason = "想听听你的声音", openingLine = "" } = {}) {
+function showIncomingVoiceCall({ openingLine = "" } = {}) {
   dismissIncomingVoiceCall();
   const layer = document.createElement("div");
   layer.className = "incoming-voice-call";
   layer.id = "incoming-voice-call";
-  layer.innerHTML = `<section role="dialog" aria-modal="true" aria-labelledby="incoming-call-title"><div class="incoming-call-avatar">${assistantAvatarMarkup()}</div><small>CLAUDE 来电</small><h2 id="incoming-call-title">Claude</h2><p>${escapeHtml(String(reason || "想听听你的声音").slice(0, 120))}</p><div><button type="button" class="incoming-call-decline">拒绝</button><button type="button" class="incoming-call-accept">接听</button></div></section>`;
+  layer.innerHTML = `<section role="dialog" aria-modal="true" aria-labelledby="incoming-call-title"><div class="incoming-call-avatar">${assistantAvatarMarkup()}</div><small>CLAUDE 来电</small><h2 id="incoming-call-title">Claude</h2><div><button type="button" class="incoming-call-decline">拒绝</button><button type="button" class="incoming-call-accept">接听</button></div></section>`;
   document.body.append(layer);
   navigator.vibrate?.([180, 90, 180]);
   requestAnimationFrame(() => layer.classList.add("show"));
@@ -6246,7 +6251,7 @@ function monitorVoiceLevel() {
 }
 
 function cleanSpeechText(text) {
-  return text
+  return stripVoiceSourceLabels(text)
     .replace(/```[\s\S]*?```/g, "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/[*_#>`~]/g, "")

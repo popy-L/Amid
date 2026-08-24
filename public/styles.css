@@ -905,7 +905,7 @@ html.is-chat-route .app-shell { min-height:100vh; background:#fffdfd; }
 .incoming-voice-call small { color:#bd7795; font-size:8px; letter-spacing:.18em; }
 .incoming-voice-call h2 { margin:8px 0 0; color:#4f4549; font:500 24px/1.2 "Terrarum Bitmap","Microsoft YaHei",sans-serif; }
 .incoming-voice-call p { min-height:44px; margin:14px 0 23px; color:#827178; font-size:12px; line-height:1.7; text-align:center; }
-.incoming-voice-call section > div:last-child { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.incoming-voice-call section > div:last-child { width:100%; margin-top:28px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .incoming-voice-call button { min-height:48px; border-radius:16px; font-size:12px; }
 .incoming-call-decline { border:1px solid #e5d3da; background:#fff; color:#776a6f; }
 .incoming-call-accept { border:0; background:#c8799c; color:#fff; box-shadow:0 8px 20px rgba(190,99,139,.22); }
