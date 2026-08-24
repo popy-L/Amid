@@ -15,6 +15,24 @@
   </head>
   <body>
     <div class="app-shell">
+      <aside class="desktop-rail" aria-label="此间桌面导航">
+        <header class="desktop-rail-brand">
+          <span aria-hidden="true">此</span>
+          <div><strong>此间</strong><small>Claude with you</small></div>
+        </header>
+        <nav>
+          <button type="button" data-desktop-route="home"><i aria-hidden="true">⌂</i><span>首页<small>Home</small></span></button>
+          <button type="button" data-desktop-route="chat"><i aria-hidden="true">◌</i><span>对话<small>Chat</small></span></button>
+          <button type="button" data-desktop-route="memory"><i aria-hidden="true">✦</i><span>记忆库<small>Memory</small></span></button>
+          <button type="button" data-desktop-route="diary"><i aria-hidden="true">▤</i><span>日记<small>Diary</small></span></button>
+          <button type="button" data-desktop-route="calendar"><i aria-hidden="true">□</i><span>日历<small>Calendar</small></span></button>
+          <button type="button" data-desktop-route="moments"><i aria-hidden="true">◇</i><span>朋友圈<small>Moments</small></span></button>
+        </nav>
+        <footer>
+          <button type="button" id="desktop-settings-button"><i aria-hidden="true">⚙</i><span>设置<small>Settings</small></span></button>
+          <p><span>AMID</span><small data-amid-version-label>v0.2.0-dev</small></p>
+        </footer>
+      </aside>
       <header class="topbar">
         <button class="brand" data-route="home" aria-label="返回此间首页">
           <span class="brand-mark">此</span>

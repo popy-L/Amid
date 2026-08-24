@@ -1,9 +1,13 @@
+import { AMID_VERSION, applyClientMode, observeClientMode } from "./platform.js";
+
 const app = document.querySelector("#app");
 const toast = document.querySelector("#toast");
 const dialog = document.querySelector("#settings-dialog");
 const accessDialog = document.querySelector("#access-dialog");
 const messageHistoryDialog = document.querySelector("#message-history-dialog");
 const claudePopup = document.querySelector("#claude-popup");
+const initialClientMode = applyClientMode();
+const routeScrollStorageKey = `amid-route-scroll-${initialClientMode}`;
 let amidAccessToken = localStorage.getItem("amid-access-token") || "";
 const designOptions = ["plain"];
 const viewOptions = ["home", "chat", "calendar", "diary", "moments", "memory"];
@@ -671,7 +675,7 @@ const routes = {
 
 function loadRouteScrollPositions() {
   try {
-    const stored = JSON.parse(sessionStorage.getItem("amid-route-scroll") || "{}");
+    const stored = JSON.parse(sessionStorage.getItem(routeScrollStorageKey) || "{}");
     return stored && typeof stored === "object" ? stored : {};
   } catch {
     return {};
@@ -690,7 +694,7 @@ function saveRouteScroll(route) {
     position.innerBottom = Math.max(0, chatHistory.scrollHeight - chatHistory.scrollTop - chatHistory.clientHeight);
   }
   routeScrollPositions[route] = position;
-  try { sessionStorage.setItem("amid-route-scroll", JSON.stringify(routeScrollPositions)); } catch {}
+  try { sessionStorage.setItem(routeScrollStorageKey, JSON.stringify(routeScrollPositions)); } catch {}
 }
 
 function restoreRouteScroll(route) {
@@ -2332,6 +2336,7 @@ function setRoute(route) {
   document.documentElement.classList.toggle("is-moments-route", route === "moments");
   document.documentElement.classList.toggle("is-memory-route", route === "memory");
   document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.route === route));
+  document.querySelectorAll("[data-desktop-route]").forEach((item) => item.classList.toggle("active", item.dataset.desktopRoute === route));
   routes[route]?.();
   syncVoiceCallSurface();
   bindSpotlights();
@@ -2547,7 +2552,7 @@ function renderHome() {
       </nav>
     </section>`;
   bindRouteButtons();
-  document.querySelector("#home-hero-gallery").addEventListener("click", () => setHeroImage(state.heroImageIndex + 1));
+  document.querySelector("#home-hero-gallery")?.addEventListener("click", () => setHeroImage(state.heroImageIndex + 1));
   bindHomeMusicPlayer();
   document.querySelector("#home-favorites-entry")?.addEventListener("click", () => openGlobalSettings("favorites"));
   updateHomeClock();
@@ -2788,10 +2793,15 @@ function messageById(id) {
 function stripVoiceAudioTags(text) {
   let matcher;
   try { matcher = new RegExp(state.voiceTagRegex, "gi"); } catch { matcher = /\[(?:[a-z][a-z0-9' -]{0,48})\]\s*/gi; }
-  return String(text || "")
+  return stripVoiceSourceLabels(String(text || "")
     .replace(matcher, "")
     .replace(/[ \t]+([,.!?;，。！？；])/g, "$1")
-    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]{2,}/g, " "));
+}
+
+function stripVoiceSourceLabels(text) {
+  return String(text || "")
+    .replace(/(^|\n)((?:\s*\[[a-z][a-z0-9' -]{0,48}\]\s*)*)(?:【(?:语音|通话语音)】|\[(?:语音|通话语音)\])\s*/gi, "$1$2")
     .trimStart();
 }
 
@@ -5742,7 +5752,7 @@ async function generateAssistantReply() {
     });
     const incomingCallTool = (result.tools || assistantMessage.tools || []).findLast((tool) => tool.name === "start_voice_call" && !tool.error);
     const hasRealAssistantText = Boolean(String(result.text || streamedAssistantText || assistantMessage.content || "").trim());
-    const rawAssistantText = String(result.text || streamedAssistantText || assistantMessage.content || (incomingCallTool ? String(incomingCallTool.arguments?.reason || "Claude 想和你通话") : "这次没有返回正文。"));
+    const rawAssistantText = String(result.text || streamedAssistantText || assistantMessage.content || (incomingCallTool ? "我打给你。" : "这次没有返回正文。"));
     if (isLeakedMessageMetadata(rawAssistantText)) {
       state.messages = state.messages.filter((message) => message.responseGroupId !== assistantMessage.responseGroupId && message.id !== assistantMessage.id);
       saveState();
@@ -6161,12 +6171,12 @@ function dismissIncomingVoiceCall() {
   window.setTimeout(() => layer.remove(), 180);
 }
 
-function showIncomingVoiceCall({ reason = "想听听你的声音", openingLine = "" } = {}) {
+function showIncomingVoiceCall({ openingLine = "" } = {}) {
   dismissIncomingVoiceCall();
   const layer = document.createElement("div");
   layer.className = "incoming-voice-call";
   layer.id = "incoming-voice-call";
-  layer.innerHTML = `<section role="dialog" aria-modal="true" aria-labelledby="incoming-call-title"><div class="incoming-call-avatar">${assistantAvatarMarkup()}</div><small>CLAUDE 来电</small><h2 id="incoming-call-title">Claude</h2><p>${escapeHtml(String(reason || "想听听你的声音").slice(0, 120))}</p><div><button type="button" class="incoming-call-decline">拒绝</button><button type="button" class="incoming-call-accept">接听</button></div></section>`;
+  layer.innerHTML = `<section role="dialog" aria-modal="true" aria-labelledby="incoming-call-title"><div class="incoming-call-avatar">${assistantAvatarMarkup()}</div><small>CLAUDE 来电</small><h2 id="incoming-call-title">Claude</h2><div><button type="button" class="incoming-call-decline">拒绝</button><button type="button" class="incoming-call-accept">接听</button></div></section>`;
   document.body.append(layer);
   navigator.vibrate?.([180, 90, 180]);
   requestAnimationFrame(() => layer.classList.add("show"));
@@ -6241,7 +6251,7 @@ function monitorVoiceLevel() {
 }
 
 function cleanSpeechText(text) {
-  return text
+  return stripVoiceSourceLabels(text)
     .replace(/```[\s\S]*?```/g, "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/[*_#>`~]/g, "")
@@ -7996,6 +8006,11 @@ async function loadRelayStatus() {
 }
 
 document.addEventListener("click", (event) => {
+  const desktopRouteButton = event.target.closest("[data-desktop-route]");
+  if (desktopRouteButton) {
+    setRoute(desktopRouteButton.dataset.desktopRoute);
+    return;
+  }
   if (event.target.closest("#message-history-entry")) {
     renderHomeMessageHistory();
     if (!messageHistoryDialog.open) messageHistoryDialog.showModal();
@@ -8027,6 +8042,7 @@ document.addEventListener("click", (event) => {
   if (routeButton) setRoute(routeButton.dataset.route);
 });
 document.querySelector("#settings-button")?.addEventListener("click", () => openGlobalSettings("root"));
+document.querySelector("#desktop-settings-button")?.addEventListener("click", () => openGlobalSettings("root"));
 document.querySelector("#global-settings-close")?.addEventListener("click", closeGlobalSettings);
 document.querySelector(".brand").addEventListener("click", () => setRoute("home"));
 document.querySelector("#claude-popup-close")?.addEventListener("click", hideClaudePopup);
@@ -8067,6 +8083,9 @@ document.addEventListener("visibilitychange", () => {
   } else {
     setVoiceCallView("background", "后台通话中…", "切到其他应用后会尽量继续；Android 若冻结 PWA，回来后会自动恢复。 ");
   }
+});
+observeClientMode(() => {
+  document.dispatchEvent(new CustomEvent("amid:client-mode-change", { detail: { version: AMID_VERSION } }));
 });
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 setRoute(state.route);
